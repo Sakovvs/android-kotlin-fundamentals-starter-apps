@@ -29,4 +29,7 @@
 \n\nI\'ll be happy to teach you how to make your own aquarium.
 \nYou should ask someone else about fishing, though.\n\n</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

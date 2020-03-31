@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import com.example.android.navigation.databinding.FragmentGameBinding
 
 class GameFragment : Fragment() {
@@ -57,7 +58,6 @@ class GameFragment : Fragment() {
     )
 
 
-
     lateinit var currentQuestion: Question
     lateinit var answers: MutableList<String>
     private var questionIndex = 0
@@ -71,9 +71,11 @@ class GameFragment : Fragment() {
                 inflater, R.layout.fragment_game, container, false)
 
         // Shuffles the questions and sets the question index to the first question.
+        // Перемешивает вопросы и устанавливает индекс вопроса на первый вопрос.
         randomizeQuestions()
 
         // Bind this fragment class to the layout
+        // Привязать этот класс фрагмента к макету
         binding.game = this
 
         // Set the onClickListener for the submitButton
@@ -90,18 +92,22 @@ class GameFragment : Fragment() {
                 }
                 // The first answer in the original question is always the correct one, so if our
                 // answer matches, we have the correct answer.
+                // Первый ответ в исходном вопросе всегда правильный, поэтому, если наш ответ совпадает, у нас есть правильный ответ.
                 if (answers[answerIndex] == currentQuestion.answers[0]) {
                     questionIndex++
                     // Advance to the next question
+                    // Переход к следующему вопросу
                     if (questionIndex < numQuestions) {
                         currentQuestion = questions[questionIndex]
                         setQuestion()
                         binding.invalidateAll()
                     } else {
                         // We've won!  Navigate to the gameWonFragment.
+                        view.findNavController().navigate(R.id.action_gameFragment_to_gameWonFragment)
                     }
                 } else {
                     // Game over! A wrong answer sends us to the gameOverFragment.
+                    view.findNavController().navigate(R.id.action_gameFragment_to_gameOverFragment)
                 }
             }
         }
@@ -117,11 +123,16 @@ class GameFragment : Fragment() {
 
     // Sets the question and randomizes the answers.  This only changes the data, not the UI.
     // Calling invalidateAll on the FragmentGameBinding updates the data.
+
+    // Устанавливает вопрос и рандомизирует ответы. Это только меняет данные, а не пользовательский интерфейс.
+    // Вызов invalidateAll для FragmentGameBinding обновляет данные.
     private fun setQuestion() {
         currentQuestion = questions[questionIndex]
         // randomize the answers into a copy of the array
+        // рандомизировать ответы в копию массива
         answers = currentQuestion.answers.toMutableList()
         // and shuffle them
+        // и тасуем их
         answers.shuffle()
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.title_android_trivia_question, questionIndex + 1, numQuestions)
     }
