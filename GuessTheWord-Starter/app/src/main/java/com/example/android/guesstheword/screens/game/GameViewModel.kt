@@ -45,7 +45,6 @@ class GameViewModel : ViewModel() {
                 word[randomPosition - 1].toUpperCase()
     }
 
-
     private lateinit var wordList: MutableList<String>
     private fun resetList() {
         wordList = mutableListOf("queen", "hospital", "basketball", "cat", "change", "snail", "soup",
