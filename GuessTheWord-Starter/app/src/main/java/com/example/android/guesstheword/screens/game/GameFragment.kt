@@ -72,7 +72,6 @@ class GameFragment : Fragment() {
 //        binding.endGameButton.setOnClickListener { onEndGame() }
 
         return binding.root
-
     }
 
 //    private fun onSkip() {
