@@ -125,7 +125,6 @@ class SleepTrackerViewModel(
         }
     }
 
-
     private suspend fun update(oldNight: SleepNight) {
         withContext(Dispatchers.IO) {
             database.update(oldNight)
