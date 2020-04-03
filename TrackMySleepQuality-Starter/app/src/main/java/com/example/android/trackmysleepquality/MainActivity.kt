@@ -42,6 +42,10 @@ import androidx.appcompat.app.AppCompatActivity
  * This main activity is just a container for our fragments,
  * where the real action is.
  */
+
+
+//https://codelabs.developers.google.com/codelabs/kotlin-android-training-room-database/#0
+
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

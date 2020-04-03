@@ -14,4 +14,40 @@
  * limitations under the License.
  */
 
+//https://codelabs.developers.google.com/codelabs/kotlin-android-training-room-database/#5
+
 package com.example.android.trackmysleepquality.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+@Database(entities = [SleepNight::class],
+        version = 1,
+        exportSchema = false)
+public abstract class SleepDatabase : RoomDatabase() {
+
+    abstract val sleepDatabaseDao: SleepDatabaseDao
+
+    companion object {
+        @Volatile                                                           // Значение Volatile (изменчивой) переменной никогда не будет кэшироваться, и все операции записи и чтения будут выполняться в и из основной памяти. Это означает, что изменения, сделанные одним потоком INSTANCE, сразу видны всем другим потокам, и вы не получите ситуацию, когда, скажем, два потока каждый обновляют одну и ту же сущность в кеше, что может создать проблему.
+        private var INSTANCE: SleepDatabase? = null
+
+        fun getInstance(context: Context): SleepDatabase {
+            synchronized(this) {
+                var instance = INSTANCE
+                if (instance == null) {
+                    instance = Room.databaseBuilder(
+                            context.applicationContext,
+                            SleepDatabase::class.java,
+                            "sleep_history_database"
+                    )
+                            .fallbackToDestructiveMigration()               // стратегия миграции ---- уничтожить и восстановить базу данных
+                            .build()
+                }
+                return instance
+            }
+        }
+    }
+}
