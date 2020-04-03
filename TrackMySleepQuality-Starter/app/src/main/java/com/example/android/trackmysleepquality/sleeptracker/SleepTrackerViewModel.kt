@@ -18,6 +18,7 @@ package com.example.android.trackmysleepquality.sleeptracker
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 
@@ -38,11 +39,31 @@ class SleepTrackerViewModel(
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)           //определяет, в каком потоке будет выполняться корутина + должен знать о Job
 
     private val nights = database.getAllNights()
+
     val nightsString = Transformations.map(nights!!) { nights ->
         formatNights(nights, application.resources)
     }
 
     private val tonight = MutableLiveData<SleepNight?>()
+
+    private val _navigationToSleepQuality = MutableLiveData<SleepNight>()
+    val navigationToSleepQuality: LiveData<SleepNight>
+        get() = _navigationToSleepQuality
+
+    private var _showSnackBarEvent = MutableLiveData<Boolean>()
+    val showSnackBarEvent: LiveData<Boolean>
+        get() = _showSnackBarEvent
+
+
+    val startButtonVisible = Transformations.map(tonight) {
+        it == null
+    }
+    val stopButtonVisible = Transformations.map(tonight) {
+        it != null
+    }
+    val clearButtonVisible = Transformations.map(nights!!) {
+        it?.isNotEmpty()
+    }
 
     init {
         initializeTonight()
@@ -65,6 +86,14 @@ class SleepTrackerViewModel(
         }
     }
 
+    fun doneNavigating() {
+        _navigationToSleepQuality.value = null
+    }
+
+    fun doneShowingSnackBar() {
+        _showSnackBarEvent.value = false
+    }
+
     fun onStartTracking() {
         uiScope.launch {
             val newNight = SleepNight()
@@ -78,6 +107,7 @@ class SleepTrackerViewModel(
             val oldNight = tonight.value ?: return@launch
             oldNight.endTimeMilli = System.currentTimeMillis()
             update(oldNight)
+            _navigationToSleepQuality.value = oldNight
         }
     }
 
@@ -85,6 +115,7 @@ class SleepTrackerViewModel(
         uiScope.launch {
             clear()
             tonight.value = null
+            _showSnackBarEvent.value = true
         }
     }
 
