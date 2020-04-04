@@ -19,6 +19,7 @@ package com.example.android.trackmysleepquality
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
+//https://codelabs.developers.google.com/codelabs/kotlin-android-training-recyclerview-fundamentals/#7
 
 class MainActivity : AppCompatActivity() {
 
