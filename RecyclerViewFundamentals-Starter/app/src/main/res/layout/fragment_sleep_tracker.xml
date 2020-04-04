@@ -46,12 +46,11 @@
             android:id="@+id/sleep_list"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@+id/clear_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/start_button"
-            tools:listitem="@layout/text_item_view" />
+            tools:listitem="@layout/list_item_sleep_night" />
 
         <Button
             android:id="@+id/start_button"
