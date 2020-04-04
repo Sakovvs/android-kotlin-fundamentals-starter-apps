@@ -136,8 +136,6 @@ class SleepTrackerFragment : Fragment() {
         }
 
         binding.sleepList.layoutManager = manager
-
-
         return binding.root
     }
 }
