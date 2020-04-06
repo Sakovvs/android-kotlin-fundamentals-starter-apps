@@ -40,7 +40,6 @@ fun TextView.setSleepQualityString(item: SleepNight?) {
     }
 }
 
-
 @BindingAdapter("sleepImage")
 fun ImageView.setSleepImage(item: SleepNight?) {
     item?.let {
