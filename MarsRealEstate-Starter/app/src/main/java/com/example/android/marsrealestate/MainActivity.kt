@@ -20,6 +20,8 @@ package com.example.android.marsrealestate
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
+// https://codelabs.developers.google.com/codelabs/kotlin-android-training-internet-images/#0
+
 class MainActivity : AppCompatActivity() {
 
     /**
