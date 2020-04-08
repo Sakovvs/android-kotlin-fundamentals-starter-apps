@@ -17,108 +17,48 @@
 package com.example.android.devbyteviewer.viewmodels
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.example.android.devbyteviewer.domain.DevByteVideo
-import com.example.android.devbyteviewer.network.DevByteNetwork
-import com.example.android.devbyteviewer.network.asDomainModel
-import kotlinx.coroutines.*
+import androidx.lifecycle.*
+import com.example.android.devbyteviewer.database.getDatabase
+import com.example.android.devbyteviewer.repository.VideosRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.io.IOException
 
-/**
- * DevByteViewModel designed to store and manage UI-related data in a lifecycle conscious way. This
- * allows data to survive configuration changes such as screen rotations. In addition, background
- * work such as fetching network results can continue through configuration changes and deliver
- * results after the new Fragment or Activity is available.
- *
- * @param application The application that this viewmodel is attached to, it's safe to hold a
- * reference to applications across rotation since Application is never recreated during actiivty
- * or fragment lifecycle events.
- */
+
 class DevByteViewModel(application: Application) : AndroidViewModel(application) {
 
-    /**
-     * This is the job for all coroutines started by this ViewModel.
-     *
-     * Cancelling this job will cancel all coroutines started by this ViewModel.
-     */
-    private val viewModelJob = SupervisorJob()
 
-    /**
-     * This is the main scope for all coroutines launched by MainViewModel.
-     *
-     * Since we pass viewModelJob, you can cancel all coroutines launched by uiScope by calling
-     * viewModelJob.cancel()
-     */
+    private val videosRepository = VideosRepository(getDatabase(application))
+    val playlist = videosRepository.videos
+
+    private val viewModelJob = SupervisorJob()
     private val viewModelScope = CoroutineScope(viewModelJob + Dispatchers.Main)
 
-    /**
-     * A playlist of videos that can be shown on the screen. This is private to avoid exposing a
-     * way to set this value to observers.
-     */
-    private val _playlist = MutableLiveData<List<DevByteVideo>>()
-
-    /**
-     * A playlist of videos that can be shown on the screen. Views should use this to get access
-     * to the data.
-     */
-    val playlist: LiveData<List<DevByteVideo>>
-        get() = _playlist
-
-
-
-    /**
-     * Event triggered for network error. This is private to avoid exposing a
-     * way to set this value to observers.
-     */
     private var _eventNetworkError = MutableLiveData<Boolean>(false)
-
-    /**
-     * Event triggered for network error. Views should use this to get access
-     * to the data.
-     */
     val eventNetworkError: LiveData<Boolean>
         get() = _eventNetworkError
 
-    /**
-     * Flag to display the error message. This is private to avoid exposing a
-     * way to set this value to observers.
-     */
     private var _isNetworkErrorShown = MutableLiveData<Boolean>(false)
-
-    /**
-     * Flag to display the error message. Views should use this to get access
-     * to the data.
-     */
     val isNetworkErrorShown: LiveData<Boolean>
         get() = _isNetworkErrorShown
 
-    /**
-     * init{} is called immediately when this ViewModel is created.
-     */
     init {
-        refreshDataFromNetwork()
+        refreshDataFromRepository()
     }
 
-    /**
-     * Refresh data from network and pass it via LiveData. Use a coroutine launch to get to
-     * background thread.
-     */
-    private fun refreshDataFromNetwork() = viewModelScope.launch {
 
-        try {
-             val playlist = DevByteNetwork.devbytes.getPlaylist().await()
-            _playlist.postValue(playlist.asDomainModel())
-
-            _eventNetworkError.value = false
-            _isNetworkErrorShown.value = false
-
-        } catch (networkError: IOException) {
-            // Show a Toast error message and hide the progress bar.
-            _eventNetworkError.value = true
+    private fun refreshDataFromRepository() {
+        viewModelScope.launch {
+            try {
+                videosRepository.refreshVideos()
+                _eventNetworkError.value = false
+                _isNetworkErrorShown.value = false
+            } catch (networkError: IOException) {
+                if (playlist.value.isNullOrEmpty())
+                    _eventNetworkError.value = true
+            }
         }
     }
 
