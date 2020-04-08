@@ -29,7 +29,6 @@ import java.io.IOException
 
 class DevByteViewModel(application: Application) : AndroidViewModel(application) {
 
-
     private val videosRepository = VideosRepository(getDatabase(application))
     val playlist = videosRepository.videos
 
