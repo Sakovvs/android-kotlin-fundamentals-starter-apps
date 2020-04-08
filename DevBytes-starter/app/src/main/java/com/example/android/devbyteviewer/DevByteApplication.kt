@@ -17,21 +17,48 @@
 package com.example.android.devbyteviewer
 
 import android.app.Application
+import androidx.work.*
+import com.example.android.devbyteviewer.Work.RefreshDataWorker
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
-/**
- * Override application to setup background work via WorkManager
- */
+//https://codelabs.developers.google.com/codelabs/kotlin-android-training-work-manager/#0
+
 class DevByteApplication : Application() {
 
-    /**
-     * onCreate is called before the first screen is shown to the user.
-     *
-     * Use it to setup any background tasks, running expensive setup operations in a background
-     * thread to avoid delaying app start.
-     */
+    private var applicationScope = CoroutineScope(Dispatchers.Default)
+
     override fun onCreate() {
         super.onCreate()
-        Timber.plant(Timber.DebugTree())
+        delayedInit()
+    }
+
+    private fun delayedInit() {
+        applicationScope.launch {
+            Timber.plant(Timber.DebugTree())
+            setupRecurringWork()
+        }
+    }
+
+    private fun setupRecurringWork() {
+        val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)
+                .setRequiresBatteryNotLow(true)
+                .setRequiresCharging(true)
+                .setRequiresDeviceIdle(true)
+                .build()
+
+        val repeatingRequest =
+                PeriodicWorkRequestBuilder<RefreshDataWorker>(1, TimeUnit.DAYS)
+                        .setConstraints(constraints)
+                        .build()
+
+        WorkManager.getInstance().enqueueUniquePeriodicWork(                   //This method allows you to add a uniquely named PeriodicWorkRequest to the queue, where only one PeriodicWorkRequest of a particular name can be active at a time.
+                RefreshDataWorker.WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,                                //Если существует незавершенная работа с тем же именем, ExistingPeriodicWorkPolicy.KEEP параметр заставляет WorkManager сохранить предыдущую периодическую работу и отклонить новый запрос на работу.
+                repeatingRequest)
     }
 }
